@@ -4,7 +4,6 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import org.example.javajwtonboading.domain.model.User;
 import org.example.javajwtonboading.domain.model.UserRole;
 
 @Getter
