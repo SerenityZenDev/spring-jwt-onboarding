@@ -30,12 +30,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화
-            .authorizeHttpRequests(
-                authorizeRequests -> authorizeRequests.requestMatchers("/h2-console/**", "/sign",
-                        "/signup")
-                    .permitAll() // H2 콘솔 경로 허용
-                    .anyRequest()
-                    .permitAll() // 모든 요청 허용 (테스트용)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/h2-console/**", "/sign", "/signup").permitAll() // H2 콘솔 및 인증 경로 허용
+                .anyRequest().authenticated() // 그 외의 모든 요청은 인증 필요
             )
             .headers(headers -> headers
                 .addHeaderWriter(new XFrameOptionsHeaderWriter(
@@ -46,6 +43,7 @@ public class SecurityConfig {
             .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 비활성화
             .httpBasic(AbstractHttpConfigurer::disable); // HTTP Basic 인증 비활성화
 
+        // JWT 필터 등록
         http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
