@@ -1,5 +1,6 @@
 package org.example.javajwtonboading.presentation.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.javajwtonboading.application.service.UserService;
 import org.example.javajwtonboading.domain.model.User;
@@ -17,7 +18,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signup")
-    public SignupResponseDTO signup(@RequestBody SignupRequestDTO signupRequestDTO) {
+    public SignupResponseDTO signup(@RequestBody @Valid SignupRequestDTO signupRequestDTO) {
         return userService.signup(
             signupRequestDTO.username(),
             signupRequestDTO.password(),
@@ -26,7 +27,7 @@ public class UserController {
     }
 
     @PostMapping("/sign")
-    public SigninResponseDTO sign(@RequestBody SigninRequestDTO signinRequestDTO) {
+    public SigninResponseDTO sign(@RequestBody @Valid SigninRequestDTO signinRequestDTO) {
         User loginedUser = userService.sign(
             signinRequestDTO.username(),
             signinRequestDTO.password()
