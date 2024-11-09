@@ -9,6 +9,10 @@ import org.example.javajwtonboading.presentation.request.SigninRequestDTO;
 import org.example.javajwtonboading.presentation.request.SignupRequestDTO;
 import org.example.javajwtonboading.presentation.response.SigninResponseDTO;
 import org.example.javajwtonboading.presentation.response.SignupResponseDTO;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,6 +43,13 @@ public class UserController {
         return SigninResponseDTO.builder()
             .token(token)
             .build();
+    }
+
+    @GetMapping("/profile")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> getUserProfile(Authentication authentication) {
+        String username = (String) authentication.getPrincipal();
+        return ResponseEntity.ok("User profile for: " + username);
     }
 
 }
