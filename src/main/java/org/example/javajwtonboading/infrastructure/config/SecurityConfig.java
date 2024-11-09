@@ -1,8 +1,12 @@
 package org.example.javajwtonboading.infrastructure.config;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.example.javajwtonboading.infrastructure.config.jwt.JwtAuthorizationFilter;
 import org.example.javajwtonboading.infrastructure.config.jwt.JwtUtil;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -23,8 +27,15 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
 
     @Bean
+    public Cache<Long, String> refreshTokenCache() {
+        return Caffeine.newBuilder()
+            .expireAfterWrite(7, TimeUnit.DAYS)
+            .maximumSize(1000)
+            .build();
+    }
+    @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtUtil);
+        return new JwtAuthorizationFilter(jwtUtil, refreshTokenCache());
     }
 
     @Bean

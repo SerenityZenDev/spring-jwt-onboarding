@@ -9,6 +9,8 @@ import org.example.javajwtonboading.presentation.request.SigninRequestDTO;
 import org.example.javajwtonboading.presentation.request.SignupRequestDTO;
 import org.example.javajwtonboading.presentation.response.SigninResponseDTO;
 import org.example.javajwtonboading.presentation.response.SignupResponseDTO;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
+    private final CacheManager cacheManager;
 
     @PostMapping("/signup")
     public SignupResponseDTO signup(@RequestBody @Valid SignupRequestDTO signupRequestDTO) {
@@ -38,10 +41,18 @@ public class UserController {
             signinRequestDTO.username(),
             signinRequestDTO.password()
         );
-        String token = jwtUtil.createToken(loginedUser.getId(), loginedUser.getUsername(), loginedUser.getRole());
+        String accessToken = jwtUtil.createAccessToken(loginedUser.getId(), loginedUser.getUsername(), loginedUser.getRole());
+        String refreshToken = jwtUtil.createRefreshToken(loginedUser.getId(), loginedUser.getUsername(), loginedUser.getRole());
+
+        // 리프레시 토큰을 Caffeine 캐시에 저장
+        Cache cache = cacheManager.getCache("refreshTokenCache");
+        if (cache != null) {
+            cache.put(loginedUser.getId(), refreshToken);
+            System.out.println(cache.get(loginedUser.getId()));
+        }
 
         return SigninResponseDTO.builder()
-            .token(token)
+            .token(accessToken)
             .build();
     }
 
