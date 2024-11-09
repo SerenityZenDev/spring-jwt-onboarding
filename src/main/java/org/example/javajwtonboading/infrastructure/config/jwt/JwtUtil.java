@@ -1,6 +1,8 @@
 package org.example.javajwtonboading.infrastructure.config.jwt;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -13,61 +15,65 @@ import org.example.javajwtonboading.domain.model.UserRole;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-@Slf4j
 @Component
 public class JwtUtil {
-    // Token 식별자
+
     public static final String BEARER_PREFIX = "Bearer ";
 
-    @Value("${jwt.secret.key}") // Base64 Encode 한 SecretKey
+    @Value("${jwt.secret.key}")
     private String secretKey;
-
-    private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-
     private Key key;
 
-    // secretKey 값을 Key 객체로 변환하는 작업을 초기화
     @PostConstruct
     public void init() {
-        byte[] bytes = Base64.getDecoder().decode(secretKey);
-        key = Keys.hmacShaKeyFor(bytes);
+        byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+        key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // JWT 토큰 생성 메서드
-    public String createToken(Long userId, String username, UserRole role) {
-        Date date = new Date();
+    public String createAccessToken(Long userId, String username, UserRole role) {
+        return createToken(userId, username, role, new Date(System.currentTimeMillis() + 60 * 60 * 1000));
+    }
 
-        // 토큰 만료시간 60분
-        long TOKEN_TIME = 60 * 60 * 1000;
+    public String createRefreshToken(Long userId, String username, UserRole role) {
+        return createToken(userId, username, role, new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000));
+    }
 
-        return BEARER_PREFIX + Jwts.builder()
+    public String createToken(Long userId, String username, UserRole role, Date expiration) {
+        return Jwts.builder()
             .setSubject(String.valueOf(userId))
             .claim("username", username)
             .claim("role", role)
-            .setExpiration(new Date(date.getTime() + TOKEN_TIME))
-            .setIssuedAt(date)
-            .signWith(key, signatureAlgorithm) // Key 객체를 사용
+            .setExpiration(expiration)
+            .signWith(key, SignatureAlgorithm.HS256)
             .compact();
     }
 
-    // JWT 토큰에서 Claims를 추출하는 메서드
     public Claims extractClaims(String token) {
         try {
-            // "Bearer " 부분을 제거하고 순수 토큰을 추출
-            if (token.startsWith(BEARER_PREFIX)) {
-                token = token.substring(BEARER_PREFIX.length());
-            }
-
-            // JWT 파싱 및 검증
             return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
-                .parseClaimsJws(token)
+                .parseClaimsJws(token.replace(BEARER_PREFIX, ""))
                 .getBody();
-        }
-        catch (Exception e) {
-            throw new RuntimeException("JWT 검증 실패", e);
+        } catch (ExpiredJwtException e) {
+            // 만료된 토큰의 경우에도 Claims를 반환하여 이후 로직에서 만료 상태를 처리할 수 있도록 함
+            return e.getClaims();
         }
     }
 
+    public boolean validateToken(String token) {
+        try {
+            Claims claims = extractClaims(token);
+            return !claims.getExpiration().before(new Date());
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public String refreshAccessToken(Long userId, String refreshToken) {
+        Claims claims = extractClaims(refreshToken);
+        String username = claims.get("username", String.class);
+        String role = claims.get("role", String.class);
+        return createAccessToken(userId, username, UserRole.valueOf(role));
+    }
 }
