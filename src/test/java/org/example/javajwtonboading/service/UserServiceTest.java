@@ -2,16 +2,12 @@ package org.example.javajwtonboading.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import org.example.javajwtonboading.application.service.UserService;
 import org.example.javajwtonboading.domain.model.User;
-import org.example.javajwtonboading.domain.model.UserRole;
 import org.example.javajwtonboading.domain.repository.UserRepository;
-import org.example.javajwtonboading.presentation.response.SignupResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

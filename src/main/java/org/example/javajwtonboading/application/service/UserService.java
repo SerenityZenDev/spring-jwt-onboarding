@@ -3,7 +3,6 @@ package org.example.javajwtonboading.application.service;
 import lombok.RequiredArgsConstructor;
 import org.example.javajwtonboading.domain.model.User;
 import org.example.javajwtonboading.domain.repository.UserRepository;
-import org.example.javajwtonboading.presentation.response.SigninResponseDTO;
 import org.example.javajwtonboading.presentation.response.SignupResponseDTO;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,7 @@ public class UserService {
             .build();
     }
 
-    public User sign(String username, String password){
+    public User sign(String username, String password) {
         User user = userRepository.findByUsername(username).orElseThrow(
             () -> new IllegalArgumentException("User not found")
         );
