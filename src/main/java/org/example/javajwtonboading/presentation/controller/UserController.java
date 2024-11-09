@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.javajwtonboading.application.service.UserService;
 import org.example.javajwtonboading.domain.model.User;
+import org.example.javajwtonboading.infrastructure.config.jwt.JwtUtil;
 import org.example.javajwtonboading.presentation.request.SigninRequestDTO;
 import org.example.javajwtonboading.presentation.request.SignupRequestDTO;
 import org.example.javajwtonboading.presentation.response.SigninResponseDTO;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/signup")
     public SignupResponseDTO signup(@RequestBody @Valid SignupRequestDTO signupRequestDTO) {
@@ -32,7 +34,7 @@ public class UserController {
             signinRequestDTO.username(),
             signinRequestDTO.password()
         );
-        String token = "temp"; // TODO: 시큐리티 이후 jwt 토큰 생성 반영
+        String token = jwtUtil.createToken(loginedUser.getId(), loginedUser.getUsername(), loginedUser.getRole());
 
         return SigninResponseDTO.builder()
             .token(token)
