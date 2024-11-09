@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.example.javajwtonboading.infrastructure.config.jwt.JwtAuthorizationFilter;
 import org.example.javajwtonboading.infrastructure.config.jwt.JwtUtil;
-import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -33,6 +32,7 @@ public class SecurityConfig {
             .maximumSize(1000)
             .build();
     }
+
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
         return new JwtAuthorizationFilter(jwtUtil, refreshTokenCache());
@@ -42,7 +42,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/h2-console/**", "/sign", "/signup").permitAll() // H2 콘솔 및 인증 경로 허용
+                .requestMatchers("/h2-console/**", "/sign", "/signup")
+                .permitAll() // H2 콘솔 및 인증 경로 허용
                 .anyRequest().authenticated() // 그 외의 모든 요청은 인증 필요
             )
             .headers(headers -> headers
@@ -50,7 +51,8 @@ public class SecurityConfig {
                     XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN)) // H2 콘솔 iframe 허용
             )
             .sessionManagement(
-                session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 비활성화
+                session -> session.sessionCreationPolicy(
+                    SessionCreationPolicy.STATELESS)) // 세션 비활성화
             .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 비활성화
             .httpBasic(AbstractHttpConfigurer::disable); // HTTP Basic 인증 비활성화
 

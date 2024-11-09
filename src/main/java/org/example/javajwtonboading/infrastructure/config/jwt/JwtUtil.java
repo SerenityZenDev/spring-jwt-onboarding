@@ -1,6 +1,5 @@
 package org.example.javajwtonboading.infrastructure.config.jwt;
 
-import com.github.benmanes.caffeine.cache.Cache;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -10,7 +9,6 @@ import jakarta.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
-import lombok.extern.slf4j.Slf4j;
 import org.example.javajwtonboading.domain.model.UserRole;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -31,11 +29,13 @@ public class JwtUtil {
     }
 
     public String createAccessToken(Long userId, String username, UserRole role) {
-        return createToken(userId, username, role, new Date(System.currentTimeMillis() + 60 * 60 * 1000));
+        return createToken(userId, username, role,
+            new Date(System.currentTimeMillis() + 60 * 60 * 1000));
     }
 
     public String createRefreshToken(Long userId, String username, UserRole role) {
-        return createToken(userId, username, role, new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000));
+        return createToken(userId, username, role,
+            new Date(System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000));
     }
 
     public String createToken(Long userId, String username, UserRole role, Date expiration) {
