@@ -16,10 +16,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class JwtUtil {
-
-    // Header KEY 값
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-
     // Token 식별자
     public static final String BEARER_PREFIX = "Bearer ";
 
