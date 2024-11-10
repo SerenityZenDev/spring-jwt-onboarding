@@ -42,7 +42,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/h2-console/**", "/sign", "/signup")
+                .requestMatchers("/h2-console/**", "/swagger-ui/**","/swagger-ui.html","/v3/api-docs/**","/sign", "/signup")
                 .permitAll() // H2 콘솔 및 인증 경로 허용
                 .anyRequest().authenticated() // 그 외의 모든 요청은 인증 필요
             )
