@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.javajwtonboading.infrastructure.config.auth.CustomPrincipal;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -51,10 +52,15 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private void setAuthentication(Claims claims) {
         Long userId = Long.parseLong(claims.getSubject());
+        String username = claims.get("username", String.class);
         String role = claims.get("role", String.class);
+
+        CustomPrincipal customPrincipal = new CustomPrincipal(userId, username);
+
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-            userId, null, List.of(new SimpleGrantedAuthority(role))
+            customPrincipal, null, List.of(new SimpleGrantedAuthority(role))
         );
+
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
     }
 
