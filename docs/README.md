@@ -131,7 +131,9 @@
 3. **AWS EC2에 재배포**
     - 최종 버전을 EC2에 배포하여 API를 검증합니다.
 4. **배포 링크**
+
     -  http://ec2-13-124-75-142.ap-northeast-2.compute.amazonaws.com:8080/swagger-ui/index.html
+
 
 ---
 
